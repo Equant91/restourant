@@ -18,22 +18,22 @@ public class KitchenController {
     @Autowired
     IKitchenService iKitchenService;
 
-    @RequestMapping(path = "/add", method = RequestMethod.POST)
+    @RequestMapping(path = "/orders", method = RequestMethod.POST)
     public Long addOrder(@RequestBody OrderDTORequest orderDTORequest) {
         return iKitchenService.addOrder(orderDTORequest);
     }
 
-    @RequestMapping(path = "/list", method = RequestMethod.GET)
+    @RequestMapping(path = "/orders", method = RequestMethod.GET)
     public List<OrderDTOResponseKitchen> getAll() {
         return iKitchenService.getAll();
     }
 
-    @RequestMapping(path = "/{id}", method = RequestMethod.GET)
-    public OrderDTOResponseKitchen getById(@PathVariable("id") long id) {
+    @RequestMapping(path = "/orders/{id}", method = RequestMethod.GET)
+    public OrderDTOResponseKitchen getById(@PathVariable long id) {
         return iKitchenService.getById(id);
     }
 
-    @RequestMapping(path = "/remove", method = RequestMethod.POST)
+    @RequestMapping(path = "/orders", method = RequestMethod.DELETE)
     public void remove(@RequestBody Long id)  {
        iKitchenService.remove(id);
     }

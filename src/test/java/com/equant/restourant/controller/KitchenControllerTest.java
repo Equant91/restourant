@@ -7,35 +7,46 @@ import com.equant.restourant.model.dto.ProductDTOResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.minidev.json.JSONUtil;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class KitchenControllerTest {
+
     RestTemplate restTemplate = new RestTemplate();
+
     List<Integer> ids = new ArrayList<>();
+
+    @LocalServerPort
+    private int port;
 
     @Test
     public void test1AddOrder() {
 
 
         for (OrderDTORequest order : getOrderDtoRequestList()) {
-            Wrapper<Integer> id = restTemplate.postForObject("http://localhost:8888/api/kitchen/add", order, Wrapper.class);
-           ids.add(id.data);
+            Wrapper<Integer> id = restTemplate.postForObject("http://localhost:" + port +"/api/kitchen/orders", order, Wrapper.class);
+            System.out.println(id.data);
+             ids.add(id.data);
             Assert.assertTrue(id.data>0);
         }
     }
     @Test
     public void test2GetAll() {
-        WrapperForOrderDTOResponse wrapper = restTemplate.getForObject("http://localhost:8888/api/kitchen/list", WrapperForOrderDTOResponse.class);
+        WrapperForOrderDTOResponse wrapper = restTemplate.getForObject("http://localhost:" + port +"/api/kitchen/orders", WrapperForOrderDTOResponse.class);
         List<OrderDTOResponseKitchen> resultOrders =  wrapper.getData();
         List<OrderDTOResponseKitchen> orders = getOrderDtoResponseList();
         for (int x = 1; x < ids.size(); x++) {
@@ -48,7 +59,7 @@ public class KitchenControllerTest {
 
     @Test
     public void test3GetAllProducts() {
-        WrapperForProductDTOResponse wfp = restTemplate.getForObject("http://localhost:8888/api/kitchen/products", WrapperForProductDTOResponse.class);
+        WrapperForProductDTOResponse wfp = restTemplate.getForObject("http://localhost:" + port +"/api/kitchen/products", WrapperForProductDTOResponse.class);
         List<ProductDTOResponse> resultProducts = wfp.getData();
         Assert.assertArrayEquals(resultProducts.toArray(), getProductDTOResponse().toArray());
     }
@@ -56,8 +67,8 @@ public class KitchenControllerTest {
     @Test
     public void test4Remove() {
         for(Integer id: ids) {
-            Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/kitchen/remove", id, Wrapper.class);
-            Assert.assertTrue(response.getData() == null);
+             restTemplate.delete("http://localhost:" + port +"/api/kitchen/orders");
+
         }
     }
 

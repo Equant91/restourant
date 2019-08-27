@@ -14,13 +14,13 @@ public class StoreController {
     @Autowired
     IStoreService iStoreService;
 
-    @RequestMapping(path = "/list", method = RequestMethod.GET)
+    @RequestMapping(path = "/orders", method = RequestMethod.GET)
     public List<OrderDTOResponseStoreAndSupply> findAll(){
     return iStoreService.getAll();
     }
 
-    @RequestMapping(path = "/execute", method = RequestMethod.POST)
-    public void executeById(@RequestBody Long id){
+    @RequestMapping(path = "/orders/{id}/executed", method = RequestMethod.POST)
+    public void executeById(@PathVariable Long id){
         iStoreService.executeOrder(id);
 
     }

@@ -11,23 +11,32 @@ import lombok.NoArgsConstructor;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class StoreControllerTest {
+
     RestTemplate restTemplate = new RestTemplate();
+
     List<Integer> ids = new ArrayList<>();
+
+    @LocalServerPort
+    private int port;
 
     @Before
     public void init() {
-
         List<OrderDTORequest> orders = new ArrayList<>();
         orders.add(new OrderDTORequest("Свинина", 1400, true));
         orders.add(new OrderDTORequest("Сахар", 6000, true));
@@ -35,7 +44,7 @@ public class StoreControllerTest {
         orders.add(new OrderDTORequest("Соль", 1000, false));
 
         for (OrderDTORequest order : orders) {
-            Wrapper<Integer> id = restTemplate.postForObject("http://localhost:8888/api/kitchen/add", order, Wrapper.class);
+            Wrapper<Integer> id = restTemplate.postForObject("http://localhost:"+ port +"/api/kitchen/orders", order, Wrapper.class);
             ids.add(id.data);
         }
     }
@@ -43,21 +52,21 @@ public class StoreControllerTest {
     @After
     public void after() {
         for (Integer id : ids) {
-            Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/kitchen/remove", id, Wrapper.class);
+             restTemplate.delete("http://localhost:"+ port +"/api/kitchen/orders", id);
 
         }
     }
 
     @Test
     public void test2ExecuteById() {
-        Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/store/execute", ids.get(ids.size() - 2), Wrapper.class);
+        Wrapper<String> response = restTemplate.postForObject("http://localhost:"+ port +"/api/store/orders/" +ids.get(ids.size() - 2) +"/executed","", Wrapper.class);
 
         Assert.assertTrue(response.data == null);
     }
 
     @Test
     public void test1FindAll() {
-        WrapperForOrderDTOResponse wrapper = restTemplate.getForObject("http://localhost:8888/api/store/list", WrapperForOrderDTOResponse.class);
+        WrapperForOrderDTOResponse wrapper = restTemplate.getForObject("http://localhost:"+ port +"/api/store/orders", WrapperForOrderDTOResponse.class);
         List<OrderDTOResponseStoreAndSupply> resultOrders = wrapper.getData();
         List<OrderDTOResponseStoreAndSupply> orders = getOrderDtoResponseList();
         for (int x = 1; x < orders.size(); x++) {
