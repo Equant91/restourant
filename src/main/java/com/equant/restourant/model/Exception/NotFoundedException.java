@@ -4,6 +4,7 @@ package com.equant.restourant.model.Exception;
 import lombok.Getter;
 
 public class NotFoundedException extends  RuntimeException {
+
     @Getter
     String description;
 

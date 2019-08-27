@@ -21,26 +21,24 @@ import java.util.List;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class KitchenControllerTest {
     RestTemplate restTemplate = new RestTemplate();
+    List<Integer> ids = new ArrayList<>();
 
     @Test
     public void test1AddOrder() {
 
-       int x = 1;
+
         for (OrderDTORequest order : getOrderDtoRequestList()) {
             Wrapper<Integer> id = restTemplate.postForObject("http://localhost:8888/api/kitchen/add", order, Wrapper.class);
-            System.out.println(id.getData());
-            System.out.println(x);
-            Assert.assertTrue(id.getData().equals(x++));
-
+           ids.add(id.data);
+            Assert.assertTrue(id.data>0);
         }
     }
-
     @Test
     public void test2GetAll() {
         WrapperForOrderDTOResponse wrapper = restTemplate.getForObject("http://localhost:8888/api/kitchen/list", WrapperForOrderDTOResponse.class);
         List<OrderDTOResponseKitchen> resultOrders =  wrapper.getData();
         List<OrderDTOResponseKitchen> orders = getOrderDtoResponseList();
-        for (int x = 1; x < resultOrders.size(); x++) {
+        for (int x = 1; x < ids.size(); x++) {
             Assert.assertTrue(resultOrders.get(x).getName().equals(orders.get(x).getName()));
 
             Assert.assertTrue(resultOrders.get(x).getWeight().equals(orders.get(x).getWeight()));
@@ -57,9 +55,10 @@ public class KitchenControllerTest {
 
     @Test
     public void test4Remove() {
-        Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/kitchen/remove", 1, Wrapper.class);
-        Assert.assertTrue(response.getData() == null);
-
+        for(Integer id: ids) {
+            Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/kitchen/remove", id, Wrapper.class);
+            Assert.assertTrue(response.getData() == null);
+        }
     }
 
     private List<OrderDTORequest> getOrderDtoRequestList() {

@@ -22,7 +22,11 @@ import static org.junit.Assert.*;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SupplyControllerTest {
 
-    @BeforeClass
+    RestTemplate restTemplate = new RestTemplate();
+
+    List<Integer> ids = new ArrayList<>();
+
+    @Before
     public  void init(){
         List<OrderDTORequest> orders = new ArrayList<>();
         orders.add(new OrderDTORequest("Свинина", 1400, true));
@@ -31,20 +35,28 @@ public class SupplyControllerTest {
         orders.add(new OrderDTORequest("Соль", 1000, false));
 
         for (OrderDTORequest order : orders) {
-            restTemplate.postForObject("http://localhost:8888/api/kitchen/add", order, Wrapper.class);
+            Wrapper<Integer> id =restTemplate.postForObject("http://localhost:8888/api/kitchen/add", order, Wrapper.class);
+            ids.add(id.data);
         }
     }
-    RestTemplate restTemplate = new RestTemplate();
+    @After
+    public void after(){
+        for (Integer id : ids) {
+        Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/kitchen/remove", id, Wrapper.class);
+
+        }
+    }
+
 
     @Test
-    public void test2executeById() {
-       Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/store/execute", 4, Wrapper.class);
+    public void test1executeById() {
+       Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/store/execute", ids.get(ids.size()- 2), Wrapper.class);
         Assert.assertTrue(response.getData()==null);
     }
 
 
     @Test
-    public void test1FindAll() {
+    public void test2FindAll() {
         WrapperForOrderDTOResponse wrapper = restTemplate.getForObject("http://localhost:8888/api/supply/list",WrapperForOrderDTOResponse.class);
         List<OrderDTOResponseStoreAndSupply> resultOrders = wrapper.getData();
         List<OrderDTOResponseStoreAndSupply> orders = getOrderDtoResponseList();

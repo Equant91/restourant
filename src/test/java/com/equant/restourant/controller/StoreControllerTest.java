@@ -23,24 +23,34 @@ import java.util.List;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class StoreControllerTest {
     RestTemplate restTemplate = new RestTemplate();
+    List<Integer> ids = new ArrayList<>();
 
-    @BeforeClass
-    public  void init(){
+    @Before
+    public void init() {
 
-            List<OrderDTORequest> orders = new ArrayList<>();
-            orders.add(new OrderDTORequest("Свинина", 1400, true));
-            orders.add(new OrderDTORequest("Сахар", 6000, true));
-            orders.add(new OrderDTORequest("Говядина", 2000, false));
-            orders.add(new OrderDTORequest("Соль", 1000, false));
+        List<OrderDTORequest> orders = new ArrayList<>();
+        orders.add(new OrderDTORequest("Свинина", 1400, true));
+        orders.add(new OrderDTORequest("Сахар", 6000, true));
+        orders.add(new OrderDTORequest("Говядина", 2000, false));
+        orders.add(new OrderDTORequest("Соль", 1000, false));
 
         for (OrderDTORequest order : orders) {
-         restTemplate.postForObject("http://localhost:8888/api/kitchen/add", order, Wrapper.class);
+            Wrapper<Integer> id = restTemplate.postForObject("http://localhost:8888/api/kitchen/add", order, Wrapper.class);
+            ids.add(id.data);
+        }
+    }
+
+    @After
+    public void after() {
+        for (Integer id : ids) {
+            Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/kitchen/remove", id, Wrapper.class);
+
         }
     }
 
     @Test
     public void test2ExecuteById() {
-        Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/store/execute", 2, Wrapper.class);
+        Wrapper<String> response = restTemplate.postForObject("http://localhost:8888/api/store/execute", ids.get(ids.size() - 2), Wrapper.class);
 
         Assert.assertTrue(response.data == null);
     }
@@ -70,10 +80,11 @@ public class StoreControllerTest {
     private static class WrapperForOrderDTOResponse {
         private List<OrderDTOResponseStoreAndSupply> data;
     }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    private static class Wrapper<T>{
+    private static class Wrapper<T> {
         private T data;
     }
 }
