@@ -3,18 +3,19 @@ package com.equant.restourant.dao.kitchen;
 import com.equant.restourant.model.Order;
 import com.equant.restourant.model.Product;
 import com.equant.restourant.model.dto.OrderDTORequest;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
 public interface IKitchenDAO {
 
-    List<Order> getAll();
+    List<Order> findAll();
 
-    Order addOrder(OrderDTORequest orderDTORequest);
+    Order insertOrder(OrderDTORequest orderDTORequest);
 
-    public Order getById(long id);
+    public Order findById(long id);
 
-    public void remove(Long id);
+    public void delete(Long id);
 
-    public List<Product> getAllProducts();
+    public List<Product> findAllProducts();
 }
